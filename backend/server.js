@@ -11,33 +11,32 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-// CORS — always allow these + any extra from env
-const allowedOrigins = new Set([
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:5173',
-  // Vercel deployments
-  'https://skill-gap-9tnmwoaig-ashwini-tripathi-s-projects.vercel.app',
-  'https://skill-gap-ai-mu.vercel.app',
-  'https://skillgap-ai.vercel.app',
-]);
-if (process.env.CORS_ORIGIN) {
-  process.env.CORS_ORIGIN.split(',').forEach(o => allowedOrigins.add(o.trim()));
-}
-
+// CORS — allow localhost, all *.vercel.app deployments, and any extra from env
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true; // curl / Postman / server-to-server
+  if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return true;
+  if (origin.endsWith('.vercel.app') || origin === 'https://vercel.app') return true;
+  if (process.env.CORS_ORIGIN) {
+    return process.env.CORS_ORIGIN.split(',').map(o => o.trim()).includes(origin);
+  }
+  return false;
+};
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.has(origin)) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
+      console.warn(`[CORS] Blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
+
+app.options('*', cors()); // handle preflight for all routes
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
