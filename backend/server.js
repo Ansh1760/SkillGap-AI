@@ -11,15 +11,20 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-// CORS — allow configured origin + localhost in dev
+// CORS — always allow these + any extra from env
 const allowedOrigins = new Set([
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
+  // Vercel deployments
+  'https://skill-gap-9tnmwoaig-ashwini-tripathi-s-projects.vercel.app',
+  'https://skill-gap-ai-mu.vercel.app',
+  'https://skillgap-ai.vercel.app',
 ]);
 if (process.env.CORS_ORIGIN) {
   process.env.CORS_ORIGIN.split(',').forEach(o => allowedOrigins.add(o.trim()));
 }
+
 
 app.use(cors({
   origin: (origin, callback) => {
