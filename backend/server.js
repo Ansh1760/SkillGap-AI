@@ -9,57 +9,64 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Connect DB
 connectDB();
 
-// CORS — allow localhost, all *.vercel.app deployments, and any extra from env
-const isAllowedOrigin = (origin) => {
-  if (!origin) return true; // curl / Postman / server-to-server
-  if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return true;
-  if (origin.endsWith('.vercel.app') || origin === 'https://vercel.app') return true;
-  if (process.env.CORS_ORIGIN) {
-    return process.env.CORS_ORIGIN.split(',').map(o => o.trim()).includes(origin);
-  }
-  return false;
-};
 
+// ✅ TEMP CORS (debug ke liye - sab allow)
 app.use(cors({
-  origin: (origin, callback) => {
-    if (isAllowedOrigin(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`[CORS] Blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: "*",
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
 }));
 
-app.options('*', cors()); // handle preflight for all routes
+app.options('*', cors());
 
+
+// ✅ Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+
+// ✅ Root route (fix "Cannot GET /")
+app.get('/', (req, res) => {
+  res.send('🚀 SkillGap AI Backend is running');
+});
+
+
+// ✅ API routes
 app.use('/api', apiRoutes);
 
+
+// ✅ Health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', model: 'gemini-2.5-flash', timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
 });
 
+
+// ✅ AI status
 app.get('/api/ai-status', async (req, res) => {
   const { getProviderStatus } = await import('./services/aiService.js');
-  res.status(200).json({ status: 'ok', providers: getProviderStatus() });
+  res.status(200).json({
+    status: 'ok',
+    providers: getProviderStatus()
+  });
 });
 
+
+// ✅ Global error handler
 app.use((err, req, res, next) => {
   console.error('[Global Error]', err.message);
-  res.status(500).json({ error: err.message || 'Internal server error' });
+  res.status(500).json({
+    error: err.message || 'Internal server error'
+  });
 });
 
+
+// ✅ Start server
 app.listen(PORT, () => {
-  const geminiKey = (process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY || 'NOT SET');
-  console.log(`✅ SkillGap AI backend running on port ${PORT}`);
-  console.log(`🔑 Gemini key: ${geminiKey !== 'NOT SET' ? geminiKey.slice(0, 8) + '...' : 'NOT SET'}`);
-  console.log(`🌐 CORS origins: ${[...allowedOrigins].join(', ')}`);
+  console.log(`✅ Backend running on port ${PORT}`);
 });
