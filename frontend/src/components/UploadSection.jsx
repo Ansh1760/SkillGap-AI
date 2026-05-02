@@ -1,9 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, File, X, Briefcase, ChevronRight, AlertCircle } from 'lucide-react';
-import axios from 'axios';
-
-const API = 'http://localhost:5000/api';
+import api from '../services/api.js';
 
 export const UploadSection = ({ onAnalysisComplete }) => {
   const [file, setFile] = useState(null);
@@ -40,7 +38,7 @@ export const UploadSection = ({ onAnalysisComplete }) => {
 
     try {
       setStep('analyzing');
-      const response = await axios.post(`${API}/analyze`, formData, {
+      const response = await api.post('/analyze', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

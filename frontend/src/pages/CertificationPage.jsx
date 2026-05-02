@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import { BrainCircuit, ChevronRight, CheckCircle2, Download, Share2, AlertCircle } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
 const CATEGORIES = ['Frontend', 'Backend', 'SQL', 'MongoDB'];
 
 const inputStyle = {
@@ -43,9 +42,7 @@ export const CertificationPage = () => {
     setStep('loading');
 
     try {
-      console.log('[CertificationPage] Fetching questions for category:', category);
-      const response = await axios.get(`${API}/questions/${category.toLowerCase()}`);
-      console.log('[CertificationPage] Response:', response.data);
+      const response = await api.get(`/questions/${category.toLowerCase()}`);
 
       if (!response.data.success || !response.data.questions || response.data.questions.length === 0) {
         throw new Error('No questions found in database. Please contact the administrator.');
@@ -93,7 +90,7 @@ export const CertificationPage = () => {
     setSubmitting(true);
     try {
       const percentage = Math.round((finalScore / questions.length) * 100);
-      await axios.post(`${API}/submit-test`, {
+      await api.post('/submit-test', {
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
@@ -102,7 +99,7 @@ export const CertificationPage = () => {
         percentage,
         category,
       });
-      console.log('[CertificationPage] Result saved successfully.');
+
     } catch (err) {
       console.error('[CertificationPage] Failed to save result:', err);
     } finally {
@@ -114,7 +111,7 @@ export const CertificationPage = () => {
     setDownloading(true);
     try {
       const percentage = Math.round((score / questions.length) * 100);
-      const response = await axios.post(
+      const response = await api.post(
         `${API}/download/certificate`,
         { name: name.trim(), score, total: questions.length, percentage, category },
         { responseType: 'blob' }

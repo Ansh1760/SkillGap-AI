@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api.js';
 import {
   MessageSquare, Download, ChevronLeft, ChevronRight,
-  Eye, AlertTriangle, Lightbulb, Target, Languages,
+  Eye, AlertTriangle, Lightbulb, Target,
 } from 'lucide-react';
-
-const API = 'http://localhost:5000/api';
 
 const TYPE_COLORS = {
   Technical:       { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',  border: 'rgba(96,165,250,0.25)' },
@@ -98,7 +96,7 @@ export const InterviewTab = ({ data, extractedText }) => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${API}/interview-prep`, {
+      const response = await api.post('/interview-prep', {
         resumeText: extractedText || '',
         missingSkills: data.missingSkills,
         weakAreas: data.weakAreas || [],
@@ -126,7 +124,7 @@ export const InterviewTab = ({ data, extractedText }) => {
     if (!questions.length) return;
     setDownloading(true);
     try {
-      const response = await axios.post(`${API}/download/interview`, { questions }, {
+      const response = await api.post('/download/interview', { questions }, {
         responseType: 'blob',
         headers: { 'Content-Type': 'application/json' },
       });

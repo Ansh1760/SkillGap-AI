@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import { BrainCircuit, ChevronRight, CheckCircle2, Download, Share2 } from 'lucide-react';
-
-const API = 'http://localhost:5000/api';
 
 export const TestPage = () => {
   const [step, setStep] = useState('setup'); // setup | loading | quiz | result
@@ -19,7 +17,7 @@ export const TestPage = () => {
     setStep('loading');
     
     try {
-      const response = await axios.post(`${API}/generate-test`, { name });
+      const response = await api.post('/generate-test', { name });
       setQuestions(response.data.questions);
       setStep('quiz');
       setCurrentIndex(0);
@@ -47,7 +45,7 @@ export const TestPage = () => {
     setDownloading(true);
     try {
       const percentage = Math.round((score / questions.length) * 100);
-      const response = await axios.post(`${API}/download/certificate`, {
+      const response = await api.post('/download/certificate', {
         name,
         score,
         total: questions.length,

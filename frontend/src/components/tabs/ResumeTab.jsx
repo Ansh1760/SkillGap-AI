@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api.js';
 import { Download, FileText, User, Briefcase, Code2, FolderGit2, Eye, GitCompare, RotateCcw } from 'lucide-react';
-
-const API = 'http://localhost:5000/api';
 
 // ─────────────────────────────────────────────────────────
 // UTILS
@@ -153,7 +151,7 @@ export const ResumeTab = ({ data, extractedText }) => {
     setError('');
     setView('improved');
     try {
-      const response = await axios.post(`${API}/optimize`, {
+      const response = await api.post('/optimize', {
         resumeText:    extractedText,
         missingSkills: data.missingSkills,
         jobTitle:      data.jobTitle,
@@ -192,7 +190,7 @@ export const ResumeTab = ({ data, extractedText }) => {
     if (!optimizedResume) return;
     setDownloading(true);
     try {
-      const response = await axios.post(`${API}/download/resume`,
+      const response = await api.post('/download/resume',
         { resumeData: optimizedResume },
         { responseType: 'blob', headers: { 'Content-Type': 'application/json' } }
       );

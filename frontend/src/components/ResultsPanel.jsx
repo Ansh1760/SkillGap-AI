@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, AlertCircle, Sparkles, FileText, Download } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api.js';
 
 export const ResultsPanel = ({ data, extractedText, onReset }) => {
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -25,7 +25,7 @@ export const ResultsPanel = ({ data, extractedText, onReset }) => {
   const handleOptimizeResume = async () => {
     setIsOptimizing(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/optimize', {
+      const response = await api.post('/optimize', {
         resumeText: extractedText,
         missingSkills: data.missingSkills,
       });
@@ -40,7 +40,7 @@ export const ResultsPanel = ({ data, extractedText, onReset }) => {
   const handleGenerateQuestions = async () => {
     setIsGeneratingQuestions(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/interview-questions', {
+      const response = await api.post('/interview-questions', {
         missingSkills: data.missingSkills,
         weakAreas: data.weakAreas
       });
