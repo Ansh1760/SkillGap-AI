@@ -107,32 +107,63 @@ export const CertificationPage = () => {
     }
   };
 
-  const downloadCertificate = async () => {
-    setDownloading(true);
-    try {
-      const percentage = Math.round((score / questions.length) * 100);
-      const response = await api.post(
-        `${API}/download/certificate`,
-        { name: name.trim(), score, total: questions.length, percentage, category },
-        { responseType: 'blob' }
-      );
+ const downloadCertificate = async () => {
+  setDownloading(true);
 
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${name.replace(/\s+/g, '_')}_${category}_Certificate.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('[CertificationPage] Certificate download failed:', err);
-      alert('Failed to download certificate. Please try again.');
-    } finally {
-      setDownloading(false);
-    }
-  };
+  try {
+    const percentage = Math.round((score / questions.length) * 100);
+
+    const response = await api.post(
+      '/download/certificate',
+      {
+        name: name.trim(),
+        score,
+        total: questions.length,
+        percentage,
+        category,
+      },
+      {
+        responseType: 'blob',
+      }
+    );
+
+    // Create PDF Blob
+    const blob = new Blob([response.data], {
+      type: 'application/pdf',
+    });
+
+    // Create download URL
+    const url = window.URL.createObjectURL(blob);
+
+    // Create temporary link
+    const link = document.createElement('a');
+    link.href = url;
+
+    // File name
+    link.setAttribute(
+      'download',
+      `${name.replace(/\s+/g, '_')}_${category}_Certificate.pdf`
+    );
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error('[CertificationPage] Certificate download failed:', err);
+
+    alert(
+      err.response?.data?.message ||
+      'Failed to download certificate. Please try again.'
+    );
+  } finally {
+    setDownloading(false);
+  }
+};
 
   const percentage = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
   const shareText = `I scored ${percentage}% in the ${category} Skill Certification on SkillGap AI! 🚀`;
